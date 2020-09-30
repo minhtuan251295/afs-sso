@@ -1,26 +1,31 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import Login from 'layouts/Login';
 
-function App() {
+import { Route, Switch, RouteComponentProps } from "react-router-dom";
+import useLocalStorage from "hooks/useLocalStorage";
+import WrapperAPI from "HOC/WrapperAPI";
+import * as ITF from 'interfaces';
+
+
+const App: React.FunctionComponent<RouteComponentProps & ITF.IAPIMethods> = (props) => {
+  const [storedValue] = useLocalStorage("access_token");
+  const history = props.history;
+  const verifyToken = props.verifyToken;
+  React.useEffect(() => {
+    if (!storedValue) { history.push("/login") }
+    else {
+      verifyToken(storedValue, () => history.push("/info"),
+        () => history.push("/login"));
+    }
+  }, [storedValue, history, verifyToken])
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <React.Fragment>
+      <Switch>
+        <Route path="/login" exact component={Login} />
+      </Switch>
+    </React.Fragment>
   );
 }
 
-export default App;
+export default WrapperAPI(App);
